@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alta de Proveedores · Proyecto Veracruz · MDreieck</title>
+<style>
+  :root{
+    --azul:#1a1080; --azul2:#2b3fb0; --azul3:#3a6bc0;
+    --oro:#f5b820; --oro-txt:#5a4300;
+    --bg:#eef2f9; --card:#ffffff; --linea:#d8dded;
+    --txt:#1f2540; --muted:#6b7290; --ok:#1e9e63; --err:#d64545;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5}
+  a{color:var(--azul2)}
+
+  /* HEADER */
+  header{background:linear-gradient(110deg,var(--azul) 0%,var(--azul2) 60%,var(--azul3) 100%);color:#fff;padding:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;max-width:1100px;margin:0 auto}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{background:#fff;border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .logo svg{width:34px;height:30px}
+  .logo .lname{font-family:Georgia,'Times New Roman',serif;line-height:1}
+  .logo .lname b{color:var(--azul);font-size:19px;letter-spacing:.5px}
+  .logo .lname small{display:block;color:var(--muted);font-size:8px;letter-spacing:1px;margin-top:1px}
+  .brand .co b{font-size:20px;display:block}
+  .brand .co span{font-size:12px;opacity:.85}
+  .badge-area{background:var(--oro);color:var(--oro-txt);font-weight:700;padding:8px 18px;border-radius:20px;font-size:14px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+
+  .hero{text-align:center;padding:26px 20px 34px;max-width:760px;margin:0 auto}
+  .hero h1{font-size:30px;margin-bottom:10px}
+  .hero p{opacity:.9;font-size:15px}
+  .trust{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .trust span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600}
+
+  /* PROGRESO */
+  .progress{background:#fff;border-bottom:1px solid var(--linea)}
+  .steps{display:flex;gap:6px;max-width:1100px;margin:0 auto;padding:14px 20px;overflow-x:auto}
+  .step{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;white-space:nowrap}
+  .step .n{width:26px;height:26px;border-radius:50%;background:#e3e7f2;color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .step.active{color:var(--azul);font-weight:700}
+  .step.active .n{background:var(--azul);color:#fff}
+  .step.done .n{background:var(--ok);color:#fff}
+  .step .sep{color:#c3c9de;margin:0 4px}
+
+  /* CONTENIDO */
+  main{max-width:760px;margin:26px auto 60px;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--linea);border-radius:14px;padding:26px;box-shadow:0 4px 18px rgba(20,20,60,.05)}
+  .sec-title{color:var(--azul);font-weight:800;font-size:16px;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--linea)}
+  .hint{background:#eef4ff;border-left:4px solid var(--azul3);padding:12px 14px;border-radius:6px;color:#3a4468;font-size:14px;margin-bottom:20px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .field{margin-bottom:14px}
+  .field.full{grid-column:1 / -1}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#333c5c}
+  label .req{color:var(--err)}
+  input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--linea);border-radius:9px;font-size:14px;font-family:inherit;background:#fbfcff;transition:.15s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--azul2);box-shadow:0 0 0 3px rgba(43,63,176,.12);background:#fff}
+  input.err{border-color:var(--err);background:#fff5f5}
+
+  .sub-block{background:#f7f9fd;border:1px solid var(--linea);border-radius:10px;padding:16px;margin-top:8px;margin-bottom:16px}
+  .sub-block h4{color:var(--azul);font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+  /* TOGGLE TIPO */
+  .tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:480px){.tipo-grid{grid-template-columns:1fr}}
+  .tipo-op{border:2px solid var(--linea);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:.15s;background:#fff}
+  .tipo-op:hover{border-color:var(--azul3)}
+  .tipo-op.sel{border-color:var(--azul);background:#eef2ff}
+  .tipo-op .ic{font-size:34px}
+  .tipo-op b{display:block;margin-top:8px;font-size:16px}
+  .tipo-op span{color:var(--muted);font-size:13px}
+
+  /* DOCS */
+  .doc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--linea);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:#fbfcff;flex-wrap:wrap}
+  .doc-row .info b{font-size:14px}
+  .doc-row .info .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px}
+  .tag.oblig{background:#fde8e8;color:#b53838}
+  .tag.opc{background:#e7f1ff;color:#2b3fb0}
+  .doc-row .up{display:flex;align-items:center;gap:8px}
+  .file-btn{background:var(--azul);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+  .file-name{font-size:12px;color:var(--ok);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  input[type=file]{display:none}
+
+  /* RESUMEN */
+  .resumen{background:#f7f9fd;border:1px solid var(--linea);border-radius:10px;padding:16px 18px;margin-bottom:18px}
+  .resumen .r{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed #e0e5f1;font-size:14px}
+  .resumen .r:last-child{border-bottom:none}
+  .resumen .r span{color:var(--muted)}
+  .resumen .r b{text-align:right}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;font-size:14px}
+  .check input{width:auto;margin-top:3px;flex-shrink:0}
+
+  /* BOTONES */
+  .nav{display:flex;gap:12px;margin-top:22px}
+  .btn{flex:1;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn-primary{background:var(--azul);color:#fff}
+  .btn-primary:hover{background:#150c66}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed}
+  .btn-ghost{background:#eef2f9;color:var(--azul);border:1px solid var(--linea);flex:0 0 auto;padding:14px 22px}
+
+  /* ÉXITO */
+  .exito{text-align:center;padding:40px 20px}
+  .exito .ic{width:80px;height:80px;background:var(--ok);border-radius:50%;color:#fff;font-size:44px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  .exito h2{color:var(--azul);margin-bottom:10px}
+  .exito p{color:var(--muted)}
+
+  .hidden{display:none !important}
+  .err-msg{color:var(--err);font-size:13px;margin-top:8px;display:none}
+  .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 60 50" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,5 55,45 5,45" fill="none" stroke="#1a1080" stroke-width="2.5"/>
+          <text x="15" y="39" font-family="Georgia,serif" font-size="24" font-weight="bold" fill="#1a1080">M</text>
+        </svg>
+        <div class="lname"><b>Dreieck</b><small>S.A. DE C.V.</small></div>
+      </div>
+      <div class="co"><b>MDreieck</b><span>S.A. de C.V.</span></div>
+    </div>
+    <div class="badge-area">VERACRUZ</div>
+  </div>
+  <div class="hero">
+    <h1>Registro de Proveedores</h1>
+    <p>Completa el formulario con tus datos y documentos para integrarte al catálogo de proveedores del Proyecto Veracruz de MDreieck S.A. de C.V.</p>
+    <div class="trust">
+      <span>🔒 Datos protegidos</span>
+      <span>📋 Ley Antilavado</span>
+      <span>⚡ Proceso digital</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="steps" id="steps">
+    <div class="step active" data-s="1"><span class="n">1</span> Tipo de persona</div>
+    <span class="sep">›</span>
+    <div class="step" data-s="2"><span class="n">2</span> Datos generales</div>
+    <span class="sep">›</span>
+    <div class="step" data-s="3"><span class="n">3</span> Documentos</div>
+    <span class="sep">›</span>
+    <div class="step" data-s="4"><span class="n">4</span> Declaración</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- PASO 1 -->
+  <section class="card step-panel" id="panel-1">
+    <div class="sec-title">① Tipo de persona</div>
+    <div class="hint">Selecciona si eres una empresa (Persona Moral) o un individuo que presta servicios (Persona Física).</div>
+    <div class="tipo-grid">
+      <div class="tipo-op" data-tipo="moral" onclick="selTipo('moral')">
+        <div class="ic">🏢</div><b>Persona Moral</b><span>Empresa / Sociedad</span>
+      </div>
+      <div class="tipo-op" data-tipo="fisica" onclick="selTipo('fisica')">
+        <div class="ic">👤</div><b>Persona Física</b><span>Individuo / Autónomo</span>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-primary" id="btn-1" onclick="next()" disabled>Continuar →</button>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="card step-panel hidden" id="panel-2">
+    <div class="sec-title">② Datos generales</div>
+
+    <!-- MORAL -->
+    <div id="datos-moral" class="hidden">
+      <div class="grid2">
+        <div class="field full"><label>Razón social <span class="req">*</span></label><input id="m-razon" data-req></div>
+        <div class="field"><label>RFC <span class="req">*</span></label><input id="m-rfc" maxlength="13" data-req style="text-transform:uppercase"></div>
+        <div class="field"><label>Giro / actividad <span class="req">*</span></label><input id="m-giro" data-req></div>
+        <div class="field full"><label>Dirección fiscal <span class="req">*</span></label><input id="m-dir" data-req></div>
+        <div class="field"><label>Teléfono <span class="req">*</span></label><input id="m-tel" type="tel" data-req></div>
+        <div class="field"><label>Correo <span class="req">*</span></label><input id="m-email" type="email" data-req></div>
+      </div>
+
+      <div class="sub-block">
+        <h4>🏦 Datos bancarios</h4>
+        <div class="grid2">
+          <div class="field"><label>Banco <span class="req">*</span></label><input id="m-banco" data-req></div>
+          <div class="field"><label>Sucursal</label><input id="m-suc"></div>
+          <div class="field full"><label>Número de cuenta o CLABE interbancaria <span class="req">*</span></label><input id="m-cuenta" data-req inputmode="numeric"></div>
+        </div>
+      </div>
+
+      <div class="sub-block">
+        <h4>⚖️ Representante legal</h4>
+        <div class="grid2">
+          <div class="field"><label>Nombre <span class="req">*</span></label><input id="m-repnom" data-req></div>
+          <div class="field"><label>Cargo <span class="req">*</span></label><input id="m-repcargo" data-req></div>
+          <div class="field"><label>RFC</label><input id="m-reprfc" maxlength="13" style="text-transform:uppercase"></div>
+          <div class="field"><label>CURP</label><input id="m-repcurp" maxlength="18" style="text-transform:uppercase"></div>
+        </div>
+      </div>
+
+      <div class="sub-block">
+        <h4>🧾 Contacto de facturación</h4>
+        <div class="grid2">
+          <div class="field full"><label>Nombre del contacto</label><input id="m-factnom"></div>
+          <div class="field"><label>Correo <span class="req">*</span></label><input id="m-factemail" type="email" data-req></div>
+          <div class="field"><label>Teléfono <span class="req">*</span></label><input id="m-facttel" type="tel" data-req></div>
+        </div>
+      </div>
+
+      <div class="sub-block">
+        <h4>💰 Contacto de cobranza</h4>
+        <div class="grid2">
+          <div class="field full"><label>Nombre del contacto</label><input id="m-cobnom"></div>
+          <div class="field"><label>Correo <span class="req">*</span></label><input id="m-cobemail" type="email" data-req></div>
+          <div class="field"><label>Teléfono <span class="req">*</span></label><input id="m-cobtel" type="tel" data-req></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FÍSICA -->
+    <div id="datos-fisica" class="hidden">
+      <div class="grid2">
+        <div class="field full"><label>Nombre completo <span class="req">*</span></label><input id="f-nombre" data-req></div>
+        <div class="field"><label>RFC <span class="req">*</span></label><input id="f-rfc" maxlength="13" data-req style="text-transform:uppercase"></div>
+        <div class="field"><label>CURP <span class="req">*</span></label><input id="f-curp" maxlength="18" data-req style="text-transform:uppercase"></div>
+        <div class="field full"><label>Actividad / servicio <span class="req">*</span></label><input id="f-act" data-req></div>
+        <div class="field full"><label>Dirección <span class="req">*</span></label><input id="f-dir" data-req></div>
+        <div class="field"><label>Teléfono <span class="req">*</span></label><input id="f-tel" type="tel" data-req></div>
+        <div class="field"><label>Correo <span class="req">*</span></label><input id="f-email" type="email" data-req></div>
+      </div>
+
+      <div class="sub-block">
+        <h4>🏦 Datos bancarios</h4>
+        <div class="grid2">
+          <div class="field"><label>Banco <span class="req">*</span></label><input id="f-banco" data-req></div>
+          <div class="field"><label>Sucursal</label><input id="f-suc"></div>
+          <div class="field full"><label>Número de cuenta o CLABE interbancaria <span class="req">*</span></label><input id="f-cuenta" data-req inputmode="numeric"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-msg" id="err-2">Por favor completa todos los campos obligatorios (*).</div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="prev()">← Atrás</button>
+      <button class="btn btn-primary" onclick="next()">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="card step-panel hidden" id="panel-3">
+    <div class="sec-title">③ Documentos</div>
+    <div class="hint">Formatos aceptados: PDF, JPG, PNG. Máximo 10&nbsp;MB por archivo.</div>
+    <div id="docs-moral" class="hidden"></div>
+    <div id="docs-fisica" class="hidden"></div>
+    <div class="err-msg" id="err-3">Faltan documentos obligatorios por subir.</div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="prev()">← Atrás</button>
+      <button class="btn btn-primary" onclick="next()">Continuar →</button>
+    </div>
+  </section>
+
+  <!-- PASO 4 -->
+  <section class="card step-panel hidden" id="panel-4">
+    <div class="sec-title">④ Declaración y envío</div>
+    <div class="resumen" id="resumen"></div>
+    <label class="check"><input type="checkbox" id="chk1"> <span>Declaro que la información y los documentos proporcionados son verídicos y corresponden a mi persona/empresa.</span></label>
+    <label class="check"><input type="checkbox" id="chk2"> <span>Acepto el <a href="#" onclick="alert('Aviso de Privacidad de MDreieck S.A. de C.V.');return false;">Aviso de Privacidad</a> de MDreieck S.A. de C.V.</span></label>
+    <div class="err-msg" id="err-4">Debes aceptar ambas casillas para poder enviar.</div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="prev()">← Atrás</button>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviar()">Enviar registro</button>
+    </div>
+  </section>
+
+  <!-- ÉXITO -->
+  <section class="card step-panel hidden" id="panel-ok">
+    <div class="exito">
+      <div class="ic">✓</div>
+      <h2>¡Registro enviado!</h2>
+      <p>Tus datos y documentos se recibieron correctamente. El equipo de MDreieck revisará tu información. Recibirás noticias en el correo que proporcionaste.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ===== CONFIGURACIÓN — CAMBIA ESTAS 4 LÍNEAS ===== */
+const APPS_URL    = 'https://script.google.com/macros/s/AKfycbynD98YPrFUKtQh6f0KNEoYR6SeKuBcs8eXPgdz3vWkQiqK-K00QuNSnwPmEccATIm-4A/exec';        // termina en /exec
+const FOLDER_ID   = '1EHwISRFrnQXc2J91pG8-IlGJ8fUgLguN';       // carpeta padre en Drive
+const NOTIF_EMAIL = 'mdk.soluciones.tec@gmail.com';            // quien recibe el aviso
+const PROYECTO    = 'Proveedores Proyecto Veracruz';
+/* ================================================= */
+
+let tipo = null;
+let paso = 1;
+const archivos = {}; // key -> File
+
+const DOCS = {
+  moral: [
+    {key:'acta',         label:'Acta Constitutiva', oblig:true},
+    {key:'csf-moral',    label:'Constancia de Situación Fiscal', oblig:true},
+    {key:'ine-moral',    label:'INE del Representante Legal', oblig:true},
+    {key:'dom-moral',    label:'Comprobante de Domicilio', oblig:true},
+    {key:'cuenta-moral', label:'Carátula de cuenta bancaria', oblig:true},
+    {key:'poder',        label:'Poder Notarial', oblig:false},
+  ],
+  fisica: [
+    {key:'csf-fisica',   label:'Constancia de Situación Fiscal', oblig:true},
+    {key:'ine-fisica',   label:'INE / Identificación oficial', oblig:true},
+    {key:'dom-fisica',   label:'Comprobante de Domicilio', oblig:true},
+    {key:'cuenta-fisica',label:'Carátula de cuenta bancaria', oblig:true},
+  ]
+};
+
+function selTipo(t){
+  tipo = t;
+  document.querySelectorAll('.tipo-op').forEach(el=>el.classList.toggle('sel', el.dataset.tipo===t));
+  document.getElementById('btn-1').disabled = false;
+}
+
+function pintarDocs(){
+  ['moral','fisica'].forEach(t=>{
+    const cont = document.getElementById('docs-'+t);
+    cont.innerHTML = DOCS[t].map(d=>`
+      <div class="doc-row">
+        <div class="info"><b>${d.label}</b><span class="tag ${d.oblig?'oblig':'opc'}">${d.oblig?'Obligatorio':'Opcional'}</span></div>
+        <div class="up">
+          <span class="file-name" id="fn-${d.key}"></span>
+          <button class="file-btn" onclick="document.getElementById('file-${d.key}').click()">Subir</button>
+          <input type="file" id="file-${d.key}" accept=".pdf,.jpg,.jpeg,.png" onchange="setFile('${d.key}',this)">
+        </div>
+      </div>`).join('');
+  });
+}
+
+function setFile(key, input){
+  const f = input.files[0];
+  if(!f) return;
+  if(f.size > 10*1024*1024){ alert('El archivo supera los 10 MB. Comprime o reduce el documento.'); input.value=''; return; }
+  archivos[key] = f;
+  document.getElementById('fn-'+key).textContent = '✓ ' + f.name;
+}
+
+function showPaso(p){
+  paso = p;
+  ['1','2','3','4','ok'].forEach(x=>document.getElementById('panel-'+x).classList.add('hidden'));
+  document.getElementById('panel-'+(p>4?'ok':p)).classList.remove('hidden');
+  document.querySelectorAll('#steps .step').forEach(el=>{
+    const s = +el.dataset.s;
+    el.classList.toggle('active', s===p);
+    el.classList.toggle('done', s<p);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleTipoUI(){
+  document.getElementById('datos-moral').classList.toggle('hidden', tipo!=='moral');
+  document.getElementById('datos-fisica').classList.toggle('hidden', tipo!=='fisica');
+  document.getElementById('docs-moral').classList.toggle('hidden', tipo!=='moral');
+  document.getElementById('docs-fisica').classList.toggle('hidden', tipo!=='fisica');
+}
+
+function validarPaso2(){
+  const panel = tipo==='moral'?document.getElementById('datos-moral'):document.getElementById('datos-fisica');
+  let ok = true;
+  panel.querySelectorAll('[data-req]').forEach(inp=>{
+    if(!inp.value.trim()){ inp.classList.add('err'); ok=false; } else inp.classList.remove('err');
+  });
+  document.getElementById('err-2').style.display = ok?'none':'block';
+  return ok;
+}
+
+function validarPaso3(){
+  const faltan = DOCS[tipo].filter(d=>d.oblig && !archivos[d.key]);
+  document.getElementById('err-3').style.display = faltan.length?'block':'none';
+  return faltan.length===0;
+}
+
+function pintarResumen(){
+  const g = id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  let rows=[], nombre, rfc, correo;
+  if(tipo==='moral'){
+    nombre=g('m-razon'); rfc=g('m-rfc'); correo=g('m-email');
+    rows=[
+      ['Tipo','Persona Moral'],['Razón social',nombre],['RFC',rfc],
+      ['Giro',g('m-giro')],['Teléfono',g('m-tel')],['Correo',correo],
+      ['Banco',g('m-banco')],['Cuenta / CLABE',g('m-cuenta')],['Sucursal',g('m-suc')||'—'],
+      ['Rep. legal',g('m-repnom')+' · '+g('m-repcargo')],
+      ['Facturación',g('m-factemail')+' · '+g('m-facttel')],
+      ['Cobranza',g('m-cobemail')+' · '+g('m-cobtel')],
+    ];
+  } else {
+    nombre=g('f-nombre'); rfc=g('f-rfc'); correo=g('f-email');
+    rows=[
+      ['Tipo','Persona Física'],['Nombre',nombre],['RFC',rfc],['CURP',g('f-curp')],
+      ['Actividad',g('f-act')],['Teléfono',g('f-tel')],['Correo',correo],
+      ['Banco',g('f-banco')],['Cuenta / CLABE',g('f-cuenta')],['Sucursal',g('f-suc')||'—'],
+    ];
+  }
+  const nDocs = Object.keys(archivos).length;
+  rows.push(['Documentos', nDocs+' archivo(s)']);
+  document.getElementById('resumen').innerHTML = rows.map(r=>`<div class="r"><span>${r[0]}</span><b>${r[1]||'—'}</b></div>`).join('');
+}
+
+function next(){
+  if(paso===1){ if(!tipo)return; toggleTipoUI(); showPaso(2); return; }
+  if(paso===2){ if(!validarPaso2())return; showPaso(3); return; }
+  if(paso===3){ if(!validarPaso3())return; pintarResumen(); showPaso(4); return; }
+}
+function prev(){ if(paso>1) showPaso(paso-1); }
+
+function toBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function g(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+async function enviar(){
+  const c1=document.getElementById('chk1').checked, c2=document.getElementById('chk2').checked;
+  if(!c1||!c2){ document.getElementById('err-4').style.display='block'; return; }
+  document.getElementById('err-4').style.display='none';
+
+  const btn=document.getElementById('btn-enviar');
+  btn.disabled=true; btn.innerHTML='<span class="loader"></span>Enviando…';
+
+  try{
+    let datos, nombre, rfc;
+    if(tipo==='moral'){
+      nombre=g('m-razon'); rfc=g('m-rfc');
+      datos={
+        razonSocial:nombre, rfc, giro:g('m-giro'), direccion:g('m-dir'), tel:g('m-tel'), email:g('m-email'),
+        banco:g('m-banco'), cuenta:g('m-cuenta'), sucursal:g('m-suc'),
+        repNombre:g('m-repnom'), repRFC:g('m-reprfc'), repCURP:g('m-repcurp'), repCargo:g('m-repcargo'),
+        factNombre:g('m-factnom'), factEmail:g('m-factemail'), factTel:g('m-facttel'),
+        cobNombre:g('m-cobnom'), cobEmail:g('m-cobemail'), cobTel:g('m-cobtel')
+      };
+    } else {
+      nombre=g('f-nombre'); rfc=g('f-rfc');
+      datos={
+        nombre, rfc, curp:g('f-curp'), actividad:g('f-act'), direccion:g('f-dir'), tel:g('f-tel'), email:g('f-email'),
+        banco:g('f-banco'), cuenta:g('f-cuenta'), sucursal:g('f-suc')
+      };
+    }
+
+    const documentos={};
+    for(const key in archivos){
+      const f=archivos[key];
+      documentos[key]={ name:f.name, type:f.type, data:await toBase64(f) };
+    }
+
+    const hoy=new Date();
+    const fecha=('0'+hoy.getDate()).slice(-2)+'/'+('0'+(hoy.getMonth()+1)).slice(-2)+'/'+hoy.getFullYear();
+
+    const payload={
+      accion:'proveedor', proyecto:PROYECTO, folderId:FOLDER_ID, notifEmail:NOTIF_EMAIL,
+      tipo, nombre, rfc, fecha, datos, documentos
+    };
+
+    await fetch(APPS_URL,{ method:'POST', body:JSON.stringify(payload) });
+    showPaso(5); // pantalla de éxito
+  }catch(err){
+    alert('Ocurrió un error al enviar. Revisa tu conexión e inténtalo de nuevo.\n\n'+err);
+    btn.disabled=false; btn.textContent='Enviar registro';
+  }
+}
+
+// init
+pintarDocs();
+</script>
+</body>
+</html>
