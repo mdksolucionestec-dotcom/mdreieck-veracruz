@@ -17,7 +17,7 @@
 
   /* HEADER */
   header{background:linear-gradient(110deg,var(--azul) 0%,var(--azul2) 60%,var(--azul3) 100%);color:#fff;padding:0}
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1100px;margin:0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 4px;max-width:1100px;margin:0 auto}
   .brand{display:flex;align-items:center;gap:14px}
   .logo{background:#fff;border-radius:10px;padding:8px 16px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
   .logo img{height:58px;display:block}
@@ -25,9 +25,9 @@
   .brand .co span{font-size:12px;opacity:.85}
   .badge-area{background:var(--oro);color:var(--oro-txt);font-weight:700;padding:8px 18px;border-radius:20px;font-size:14px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 
-  .hero{text-align:center;padding:2px 20px 10px;max-width:760px;margin:0 auto}
-  .hero h1{font-size:22px;margin-bottom:4px}
-  .hero p{opacity:.9;font-size:13px}
+  .hero{text-align:center;padding:0 20px 10px;max-width:760px;margin:0 auto}
+  .hero h1{font-size:21px;margin-bottom:3px}
+  .hero p{opacity:.9;font-size:12.5px;line-height:1.35}
   .trust{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
   .trust span{padding:5px 12px;font-size:12px}
   .trust span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
@@ -263,7 +263,7 @@
   <!-- PASO 3 -->
   <section class="card step-panel hidden" id="panel-3">
     <div class="sec-title">③ Documentos</div>
-    <div class="hint">Formatos aceptados: PDF, JPG, PNG. Máximo 10&nbsp;MB por archivo.</div>
+    <div class="hint">Formatos aceptados: PDF, JPG, PNG. Máximo 45&nbsp;MB por archivo.</div>
     <div id="docs-moral" class="hidden"></div>
     <div id="docs-fisica" class="hidden"></div>
     <div class="err-msg" id="err-3">Faltan documentos obligatorios por subir.</div>
@@ -350,7 +350,7 @@ function pintarDocs(){
 function setFile(key, input){
   const f = input.files[0];
   if(!f) return;
-  if(f.size > 10*1024*1024){ alert('El archivo supera los 10 MB. Comprime o reduce el documento.'); input.value=''; return; }
+  if(f.size > 45*1024*1024){ alert('El archivo supera los 45 MB. Comprime o reduce el documento.'); input.value=''; return; }
   archivos[key] = f;
   document.getElementById('fn-'+key).textContent = '✓ ' + f.name;
 }
@@ -434,13 +434,21 @@ function toBase64(file){
 
 function g(id){const e=document.getElementById(id);return e?e.value.trim():'';}
 
+async function postJSON(obj){
+  await fetch(APPS_URL, { method:'POST', body:JSON.stringify(obj) });
+}
+function setStatus(txt){
+  const btn=document.getElementById('btn-enviar');
+  btn.innerHTML='<span class="loader"></span>'+txt;
+}
+
 async function enviar(){
   const c1=document.getElementById('chk1').checked, c2=document.getElementById('chk2').checked;
   if(!c1||!c2){ document.getElementById('err-4').style.display='block'; return; }
   document.getElementById('err-4').style.display='none';
 
   const btn=document.getElementById('btn-enviar');
-  btn.disabled=true; btn.innerHTML='<span class="loader"></span>Enviando…';
+  btn.disabled=true; setStatus('Preparando envío…');
 
   try{
     let datos, nombre, rfc;
@@ -461,21 +469,40 @@ async function enviar(){
       };
     }
 
-    const documentos={};
-    for(const key in archivos){
-      const f=archivos[key];
-      documentos[key]={ name:f.name, type:f.type, data:await toBase64(f) };
-    }
-
     const hoy=new Date();
     const fecha=('0'+hoy.getDate()).slice(-2)+'/'+('0'+(hoy.getMonth()+1)).slice(-2)+'/'+hoy.getFullYear();
 
-    const payload={
-      accion:'proveedor', proyecto:PROYECTO, folderId:FOLDER_ID, notifEmail:NOTIF_EMAIL,
-      tipo, nombre, rfc, fecha, datos, documentos
-    };
+    // ID único para este registro (agrupa la carpeta y sus chunks en el servidor)
+    const regId=(rfc+'_'+Date.now()).replace(/[^A-Za-z0-9_]/g,'');
 
-    await fetch(APPS_URL,{ method:'POST', body:JSON.stringify(payload) });
+    // 1) Crear la carpeta del proveedor en Drive
+    await postJSON({ accion:'init', regId, folderId:FOLDER_ID, rfc, nombre });
+
+    // 2) Subir cada documento por separado y en pedazos (chunks)
+    const CHUNK = 5000000; // ~5 MB de texto base64 por envío
+    const keys = Object.keys(archivos);
+    for(let idx=0; idx<keys.length; idx++){
+      const key = keys[idx];
+      const f   = archivos[key];
+      setStatus('Subiendo documento '+(idx+1)+' de '+keys.length+'…');
+      const b64 = await toBase64(f);
+      const total = Math.max(1, Math.ceil(b64.length/CHUNK));
+      for(let i=0;i<total;i++){
+        const part = b64.slice(i*CHUNK, (i+1)*CHUNK);
+        await postJSON({ accion:'chunk', regId, docKey:key, i, chunk:part });
+        setStatus('Subiendo documento '+(idx+1)+' de '+keys.length+' ('+Math.round(((i+1)/total)*100)+'%)…');
+      }
+      // Ensamblar el documento completo en Drive
+      await postJSON({ accion:'assemble', regId, docKey:key, fileName:f.name, fileType:(f.type||'application/octet-stream'), n:total });
+    }
+
+    // 3) Finalizar: carátula PDF + fila en Sheets + correo
+    setStatus('Finalizando…');
+    await postJSON({
+      accion:'finalize', regId, proyecto:PROYECTO, folderId:FOLDER_ID, notifEmail:NOTIF_EMAIL,
+      tipo, nombre, rfc, fecha, datos, nDocs:keys.length
+    });
+
     showPaso(5); // pantalla de éxito
   }catch(err){
     alert('Ocurrió un error al enviar. Revisa tu conexión e inténtalo de nuevo.\n\n'+err);
