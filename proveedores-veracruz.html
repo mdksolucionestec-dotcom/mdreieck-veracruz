@@ -17,7 +17,7 @@
 
   /* HEADER */
   header{background:linear-gradient(110deg,var(--azul) 0%,var(--azul2) 60%,var(--azul3) 100%);color:#fff;padding:0}
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;max-width:1100px;margin:0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1100px;margin:0 auto}
   .brand{display:flex;align-items:center;gap:14px}
   .logo{background:#fff;border-radius:10px;padding:8px 14px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
   .logo img{height:42px;display:block}
@@ -25,10 +25,10 @@
   .brand .co span{font-size:12px;opacity:.85}
   .badge-area{background:var(--oro);color:var(--oro-txt);font-weight:700;padding:8px 18px;border-radius:20px;font-size:14px;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 
-  .hero{text-align:center;padding:26px 20px 34px;max-width:760px;margin:0 auto}
-  .hero h1{font-size:30px;margin-bottom:10px}
-  .hero p{opacity:.9;font-size:15px}
-  .trust{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .hero{text-align:center;padding:14px 20px 20px;max-width:760px;margin:0 auto}
+  .hero h1{font-size:25px;margin-bottom:7px}
+  .hero p{opacity:.9;font-size:14px}
+  .trust{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
   .trust span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600}
 
   /* PROGRESO */
@@ -108,6 +108,21 @@
   .err-msg{color:var(--err);font-size:13px;margin-top:8px;display:none}
   .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* MODAL AVISO */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,15,40,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999}
+  .modal-box{background:#fff;border-radius:14px;max-width:720px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+  .modal-head{background:var(--azul);color:#fff;padding:16px 20px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center}
+  .modal-head b{font-size:16px}
+  .modal-head .x{background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;line-height:1}
+  .modal-body{padding:20px 22px;overflow-y:auto;font-size:13.5px;color:#333c5c;line-height:1.6}
+  .modal-body h3{color:var(--azul);font-size:14px;margin:16px 0 6px}
+  .modal-body h3:first-child{margin-top:0}
+  .modal-body p{margin-bottom:8px}
+  .modal-body ul{margin:0 0 8px 20px}
+  .modal-body li{margin-bottom:3px}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--linea)}
+  .modal-foot button{width:100%;background:var(--azul);color:#fff;border:none;padding:12px;border-radius:9px;font-weight:700;cursor:pointer;font-size:14px}
 </style>
 </head>
 <body>
@@ -262,7 +277,7 @@
     <div class="sec-title">④ Declaración y envío</div>
     <div class="resumen" id="resumen"></div>
     <label class="check"><input type="checkbox" id="chk1"> <span>Declaro que la información y los documentos proporcionados son verídicos y corresponden a mi persona/empresa.</span></label>
-    <label class="check"><input type="checkbox" id="chk2"> <span>Acepto el <a href="#" onclick="alert('Aviso de Privacidad de MDreieck S.A. de C.V.');return false;">Aviso de Privacidad</a> de MDreieck S.A. de C.V.</span></label>
+    <label class="check"><input type="checkbox" id="chk2"> <span>Acepto el <a href="#" onclick="abrirAviso();return false;">Aviso de Privacidad</a> de MDreieck S.A. de C.V.</span></label>
     <div class="err-msg" id="err-4">Debes aceptar ambas casillas para poder enviar.</div>
     <div class="nav">
       <button class="btn btn-ghost" onclick="prev()">← Atrás</button>
@@ -470,5 +485,70 @@ async function enviar(){
 // init
 pintarDocs();
 </script>
+
+<!-- MODAL AVISO DE PRIVACIDAD -->
+<div class="modal-bg hidden" id="avisoModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <b>Aviso de Privacidad Integral</b>
+      <button class="x" onclick="cerrarAviso()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p><b>MDreieck S.A. de C.V.</b> (en adelante &ldquo;MDreieck&rdquo; o &ldquo;el Responsable&rdquo;), con domicilio en <b>[DOMICILIO FISCAL DE MDREIECK S.A. DE C.V.]</b>, es responsable del uso, tratamiento y protecci&oacute;n de los datos personales que usted proporcione a trav&eacute;s de este formulario de registro de proveedores, en t&eacute;rminos de la Ley Federal de Protecci&oacute;n de Datos Personales en Posesi&oacute;n de los Particulares vigente y dem&aacute;s disposiciones aplicables.</p>
+
+      <h3>1. Datos personales que se recaban</h3>
+      <p>Para las finalidades se&ntilde;aladas, MDreieck podr&aacute; recabar las siguientes categor&iacute;as de datos, seg&uacute;n corresponda a persona f&iacute;sica o moral:</p>
+      <ul>
+        <li><b>Identificaci&oacute;n:</b> nombre o raz&oacute;n social, RFC, CURP, giro o actividad, domicilio fiscal, tel&eacute;fono y correo electr&oacute;nico.</li>
+        <li><b>Del representante legal:</b> nombre, RFC, CURP y cargo.</li>
+        <li><b>De contacto de facturaci&oacute;n y cobranza:</b> nombre, correo electr&oacute;nico y tel&eacute;fono.</li>
+        <li><b>Financieros / patrimoniales:</b> banco, n&uacute;mero de cuenta, CLABE interbancaria y sucursal, para efectos de pago.</li>
+        <li><b>Documentaci&oacute;n soporte:</b> acta constitutiva, constancia de situaci&oacute;n fiscal, identificaci&oacute;n oficial (INE), comprobante de domicilio, car&aacute;tula de cuenta bancaria y, en su caso, poder notarial.</li>
+      </ul>
+      <p><b>No se recaban datos personales sensibles.</b> Los datos financieros y patrimoniales ser&aacute;n tratados bajo estrictas medidas de seguridad y &uacute;nicamente para las finalidades aqu&iacute; previstas, requiriendo su consentimiento expreso.</p>
+
+      <h3>2. Finalidades del tratamiento</h3>
+      <p><b>Finalidades primarias</b> (necesarias para la relaci&oacute;n con el proveedor):</p>
+      <ul>
+        <li>Integrar, validar y mantener actualizado el padr&oacute;n y expediente de proveedores.</li>
+        <li>Verificar su identidad, existencia legal y capacidad para contratar.</li>
+        <li>Gestionar la relaci&oacute;n comercial, &oacute;rdenes de compra y prestaci&oacute;n de bienes o servicios.</li>
+        <li>Realizar pagos, emitir y recibir comprobantes fiscales y atender la cobranza.</li>
+        <li>Cumplir obligaciones fiscales, contables, administrativas y legales aplicables.</li>
+        <li>Establecer comunicaci&oacute;n con usted respecto de su registro y la relaci&oacute;n comercial.</li>
+      </ul>
+      <p><b>Finalidades secundarias</b> (no necesarias; puede oponerse a ellas):</p>
+      <ul>
+        <li>Invitarle a participar en futuros proyectos o procesos de contrataci&oacute;n.</li>
+        <li>Evaluaciones de desempe&ntilde;o y encuestas de calidad.</li>
+      </ul>
+      <p>Si no desea que sus datos se traten para las finalidades secundarias, puede manifestarlo enviando un correo a la direcci&oacute;n indicada en el punto 5. Su negativa no ser&aacute; motivo para negarle el registro como proveedor.</p>
+
+      <h3>3. Transferencias de datos</h3>
+      <p>Sus datos podr&aacute;n ser transferidos, sin requerir su consentimiento en los casos previstos por la ley, a autoridades fiscales, administrativas o judiciales cuando exista requerimiento fundado, as&iacute; como a asesores contables, legales o fiscales que apoyen a MDreieck bajo obligaci&oacute;n de confidencialidad. MDreieck no comercializa ni vende sus datos personales.</p>
+
+      <h3>4. Fundamento legal</h3>
+      <p>El tratamiento se realiza conforme a la Ley Federal de Protecci&oacute;n de Datos Personales en Posesi&oacute;n de los Particulares y su normativa aplicable. La autoridad en la materia es la Secretar&iacute;a Anticorrupci&oacute;n y Buen Gobierno, a trav&eacute;s de su Direcci&oacute;n General de Datos Personales en el Sector Privado.</p>
+
+      <h3>5. Derechos ARCO y revocaci&oacute;n del consentimiento</h3>
+      <p>Usted tiene derecho a <b>Acceder</b>, <b>Rectificar</b> y <b>Cancelar</b> sus datos personales, as&iacute; como a <b>Oponerse</b> a su tratamiento (derechos ARCO) y a revocar el consentimiento otorgado. Para ejercerlos, env&iacute;e su solicitud al correo <b>mdk.soluciones.tec@gmail.com</b>, indicando su nombre, el derecho que desea ejercer, una descripci&oacute;n clara de los datos y adjuntando identificaci&oacute;n oficial que acredite su titularidad o representaci&oacute;n.</p>
+
+      <h3>6. Cambios al aviso de privacidad</h3>
+      <p>El presente aviso puede sufrir modificaciones derivadas de nuevos requerimientos legales o de las propias necesidades de MDreieck. Cualquier cambio se comunicar&aacute; a trav&eacute;s de este mismo medio.</p>
+
+      <p style="margin-top:14px;color:#6b7290;font-size:12px">&Uacute;ltima actualizaci&oacute;n: julio de 2026.</p>
+    </div>
+    <div class="modal-foot">
+      <button onclick="cerrarAviso()">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirAviso(){ document.getElementById('avisoModal').classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function cerrarAviso(){ document.getElementById('avisoModal').classList.add('hidden'); document.body.style.overflow=''; }
+document.getElementById('avisoModal').addEventListener('click',function(e){ if(e.target===this) cerrarAviso(); });
+</script>
+
 </body>
 </html>
